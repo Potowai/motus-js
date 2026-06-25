@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Pendu JS</title>
+    <title>Mini Pendu</title>
     <link rel="stylesheet" href="student-style.css">
 </head>
 <body>
     <main class="card">
-        <h1>Pendu JS</h1>
-        <p class="sub">Devine le mot secret lettre par lettre avant d'avoir trop d'erreurs.</p>
+        <div class="top">
+            <h1>Pendu</h1>
+            <a href="index.html" class="back">Retour</a>
+        </div>
+        <p class="sub">Devine le mot lettre par lettre avant 7 erreurs.</p>
 
         <div class="status">
             <span>Erreurs: <span id="Erreurs">0</span>/7</span>
@@ -19,13 +22,15 @@
         <div id="MotAffiche" class="word"></div>
 
         <div class="actions">
-            <input id="Lettre" maxlength="1" placeholder="Une lettre">
-            <button onclick="proposer()">Proposer</button>
-            <button class="secondary" onclick="nouvellePartie()">Rejouer</button>
+            <input id="Lettre" maxlength="1" placeholder="Lettre">
+            <div style="display:flex;gap:8px">
+                <button class="primary" onclick="proposer()">Proposer</button>
+                <button class="secondary" onclick="nouvellePartie()">Rejouer</button>
+            </div>
         </div>
 
-        <p id="Lettres" class="letters"></p>
-        <p id="Message" class="msg"></p>
+        <div id="Lettres" class="letters"></div>
+        <div id="Message" class="msg"></div>
     </main>
 
     <script>
@@ -103,7 +108,7 @@
         }
 
         if (lettresEssayees.includes(lettre)) {
-            afficherMessage("Tu as deja essaye cette lettre.", "err");
+            afficherMessage("Deja essayee.", "err");
             return;
         }
 
@@ -142,6 +147,10 @@
         afficherMessage("Propose une lettre.", "");
         document.getElementById("Lettre").focus();
     }
+
+    document.getElementById("Lettre").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") proposer();
+    });
 
     nouvellePartie();
     </script>

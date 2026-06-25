@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Jeux JS</title>
+    <style>
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .home-card {
+            width: min(100%, 420px);
+            background: #fff;
+            border-radius: 16px;
+            padding: 32px 28px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .home-sub {
+            margin: 4px 0 24px;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .game-link {
+            display: block;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #e4e6ea;
+            text-decoration: none;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .game-link:hover {
+            border-color: #4f46e5;
+            background: #f8faff;
+        }
+
+        .game-link .titre {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .game-link .desc {
+            display: block;
+            color: #666;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        .game-link .badge {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-vert {
+            background: #eef2ff;
+            color: #4f46e5;
+        }
+
+        .badge-jaune {
+            background: #fffbeb;
+            color: #d97706;
+        }
+
+        .home-footer {
+            margin-top: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="home-card">
+        <h1>Mini Jeux JS</h1>
+        <p class="home-sub">Choisis ton jeu et complete le code, puis deploie sur Netlify.</p>
+
+        <a href="motus.html" class="game-link">
+            <span class="titre">Motus</span>
+            <span class="desc">Trouve le mot secret en 6 essais. Vert, jaune, gris.</span>
+            <span class="badge badge-vert">5 lettres</span>
+        </a>
+        <a href="pendu.html" class="game-link">
+            <span class="titre">Pendu</span>
+            <span class="desc">Devine le mot lettre par lettre avant 7 erreurs.</span>
+            <span class="badge badge-jaune">7 erreurs max</span>
+        </a>
+
+        <p class="home-footer">Deploie ce dossier sur Netlify Drop.</p>
+    </div>
+</body>
+</html>

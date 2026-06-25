@@ -3,23 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mon Mini Motus</title>
+    <title>Mini Motus</title>
     <link rel="stylesheet" href="student-style.css">
 </head>
 <body>
     <main class="card">
-        <h1>Mini Motus</h1>
-        <p class="sub">Trouve le mot secret en 6 essais. Vert: bonne place. Jaune: mauvaise place. Gris: absent.</p>
+        <div class="top">
+            <h1>Motus</h1>
+            <a href="index.html" class="back">Retour</a>
+        </div>
+        <p class="sub">Trouve le mot secret en 6 essais.</p>
 
         <div id="Grille" class="grid"></div>
 
         <div class="actions">
             <input id="Tentative" maxlength="5" placeholder="Mot de 5 lettres">
-            <button onclick="valider()">Valider</button>
-            <button class="secondary" onclick="nouvellePartie()">Rejouer</button>
+            <div style="display:flex;gap:8px">
+                <button class="primary" onclick="valider()">Valider</button>
+                <button class="secondary" onclick="nouvellePartie()">Rejouer</button>
+            </div>
         </div>
 
-        <p id="Message" class="msg"></p>
+        <div id="Message" class="msg"></div>
+        <div id="Historique" class="letters"></div>
     </main>
 
     <script>
@@ -31,12 +37,12 @@
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // 1. Tu peux ajouter tes propres mots de 5 lettres.
     const mots = ["TABLE", "CHIEN", "PLAGE", "ROUTE", "LAMPE", "LIVRE", "FLEUR", "NUAGE"];
 
     let motSecret = "";
     let essai = 0;
     let fini = false;
+    let historiqueLettres = [];
 
     function choisirMot() {
         // A COMPLETER:
@@ -69,6 +75,15 @@
         message.className = "msg " + type;
     }
 
+    function ajouterHistorique(lettres) {
+        for (let l of lettres) {
+            if (!historiqueLettres.includes(l)) {
+                historiqueLettres.push(l);
+            }
+        }
+        document.getElementById("Historique").textContent = "Lettres utilisees: " + historiqueLettres.join(", ");
+    }
+
     function nettoyer(mot) {
         return mot.trim().toUpperCase();
     }
@@ -82,12 +97,13 @@
             let lettre = mot[i];
 
             caseLettre.textContent = lettre;
+            caseLettre.classList.add("pop");
 
             // A COMPLETER:
             // Si la lettre est exactement a la bonne position: classe "case bon"
             // Sinon si la lettre existe dans le mot secret: classe "case presque"
             // Sinon: classe "case faux"
-            caseLettre.className = "case faux";
+            caseLettre.className = "case pop faux";
         }
     }
 
@@ -103,6 +119,7 @@
             return;
         }
 
+        ajouterHistorique(mot);
         afficherMot(mot);
 
         // A COMPLETER:
@@ -120,10 +137,16 @@
         motSecret = choisirMot();
         essai = 0;
         fini = false;
+        historiqueLettres = [];
+        document.getElementById("Historique").textContent = "";
         creerGrille();
         afficherMessage("A toi de jouer.", "");
         document.getElementById("Tentative").focus();
     }
+
+    document.getElementById("Tentative").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") valider();
+    });
 
     nouvellePartie();
     </script>

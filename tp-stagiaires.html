@@ -151,7 +151,7 @@
 
         .progress {
             display: grid;
-            grid-template-columns: repeat(11, 1fr);
+            grid-template-columns: repeat(10, 1fr);
             gap: 5px;
             padding: 14px 20px;
         }
@@ -424,28 +424,21 @@
             }
         },
         {
-            title: "8. Compter les essais",
-            text: "Le joueur n'a pas des essais infinis. On utilise un compteur.",
-            goal: "Objectif: augmente essai de 1 et affiche Essai 2.",
-            starter: "// Exemple :\nlet score = 0;\nscore = score + 10;\nconsole.log(score);\n\n// Mission : cree essai avec la valeur 1\n// Augmente essai de 1, puis affiche Essai 2\n",
-            check: r => r.context.essai === 2 && r.logs.includes("Essai 2")
-        },
-        {
-            title: "9. Mini fonction Motus",
+            title: "8. Mini fonction Motus",
             text: "On regroupe la comparaison dans une fonction pour la reutiliser.",
             goal: "Objectif: cree une fonction comparer qui retourne vert, jaune ou gris.",
             starter: "// Exemple :\nfunction direBonjour(prenom) {\n    return \"Bonjour \" + prenom;\n}\n\nconsole.log(direBonjour(\"Alex\"));\n\n// Mission : cree une fonction comparer(motSecret, tentative, position)\n// Elle doit retourner vert, jaune ou gris\n",
             check: r => typeof r.context.comparer === "function" && r.logs.includes("vert") && r.logs.includes("jaune")
         },
         {
-            title: "10. Variante Pendu",
+            title: "9. Variante Pendu",
             text: "Le Pendu utilise la meme base: un mot secret, une lettre proposee, et un tableau de lettres trouvees.",
             goal: "Objectif: si la lettre existe dans le mot, ajoute-la au tableau lettresTrouvees.",
             starter: "// Exemple :\nlet animaux = [\"chat\"];\nanimaux.push(\"chien\");\nconsole.log(animaux);\n\n// Mission : si lettre existe dans motSecret, ajoute-la dans lettresTrouvees\nlet motSecret = \"SOLEIL\";\nlet lettre = \"E\";\nlet lettresTrouvees = [];\n",
             check: r => Array.isArray(r.context.lettresTrouvees) && r.context.lettresTrouvees.includes("E")
         },
         {
-            title: "11. Choix final et deploiement",
+            title: "10. Choix final et deploiement",
             text: "Maintenant, choisis ton fichier: student/motus.html ou student/pendu.html. Complete les zones indiquees, teste, puis deploie sur Netlify Drop.",
             goal: "Objectif: affiche le nom du jeu que tu veux faire: Motus ou Pendu.",
             starter: "// Mission finale : choisis ton jeu\n// Cree une variable choix avec Motus ou Pendu\n// Puis affiche Je choisis Motus ou Je choisis Pendu\n",
@@ -461,7 +454,6 @@
         "Indice: utilise tentative.length === 5 dans une condition if.",
         "Indice: la premiere lettre est a l'index 0: tentative[0].",
         "Indice: commence par let lettreTentative = tentative[i], puis utilise motSecret.includes(lettreTentative).",
-        "Indice: essai = essai + 1 permet d'augmenter le compteur.",
         "Indice: une fonction peut retourner une valeur avec return.",
         "Indice: motSecret.includes(lettre) teste si la lettre est dans le mot.",
         "Indice: choix doit valoir exactement Motus ou Pendu."
