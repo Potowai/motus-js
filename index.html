@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Motus JS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="app">
+        <section class="panel">
+            <p class="supertitle">Mini-jeu JavaScript</p>
+            <h1>Mini Motus</h1>
+            <p class="intro">Trouve le mot secret en 6 essais. Vert: bonne place. Jaune: mauvaise place. Gris: absent.</p>
+
+            <div id="grille" class="grid" aria-label="Grille des essais"></div>
+
+            <form id="formulaire" class="controls">
+                <input id="tentative" type="text" maxlength="5" autocomplete="off" placeholder="Mot de 5 lettres">
+                <button type="submit">Valider</button>
+                <button id="rejouer" type="button" class="secondary">Rejouer</button>
+            </form>
+
+            <p id="message" class="message" aria-live="polite"></p>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>

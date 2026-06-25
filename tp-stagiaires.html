@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP - Mini Motus & Pendu JS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/material-darker.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/theme/eclipse.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/lint.min.css">
+    <style>
+        :root {
+            --bg: #09090b;
+            --card: #18181b;
+            --soft: #27272a;
+            --border: #3f3f46;
+            --text: #fafafa;
+            --muted: #a1a1aa;
+            --ok: #22c55e;
+            --err: #ef4444;
+            --warn: #eab308;
+            --editor: #0c0c0f;
+        }
+
+        [data-theme="light"] {
+            --bg: #f4f4f5;
+            --card: #ffffff;
+            --soft: #e4e4e7;
+            --border: #d4d4d8;
+            --text: #18181b;
+            --muted: #71717a;
+            --editor: #fafafa;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            padding: 12px 18px;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .brand {
+            flex: 1;
+            font-weight: 800;
+            font-size: 18px;
+        }
+
+        select,
+        button {
+            min-height: 38px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--text);
+            color: var(--bg);
+            padding: 0 12px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        select {
+            max-width: 360px;
+            background: var(--card);
+            color: var(--text);
+        }
+
+        button.secondary {
+            background: transparent;
+            color: var(--text);
+        }
+
+        button.save {
+            background: var(--ok);
+            border-color: var(--ok);
+            color: #052e16;
+        }
+
+        .saved {
+            width: 132px;
+            color: var(--ok);
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .saved.show {
+            opacity: 1;
+        }
+
+        main {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 320px minmax(360px, 1fr) 360px;
+        }
+
+        aside,
+        .output {
+            min-height: 0;
+            background: var(--card);
+            overflow: auto;
+        }
+
+        aside {
+            border-right: 1px solid var(--border);
+        }
+
+        .output {
+            border-left: 1px solid var(--border);
+        }
+
+        .mission {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mission h1 {
+            margin: 0 0 10px;
+            font-size: 22px;
+        }
+
+        .mission p {
+            margin: 0 0 12px;
+            color: var(--muted);
+            line-height: 1.55;
+        }
+
+        .mission code {
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: var(--soft);
+            color: var(--text);
+        }
+
+        .progress {
+            display: grid;
+            grid-template-columns: repeat(11, 1fr);
+            gap: 5px;
+            padding: 14px 20px;
+        }
+
+        .dot {
+            height: 6px;
+            border-radius: 999px;
+            background: var(--border);
+        }
+
+        .dot.done {
+            background: var(--ok);
+        }
+
+        .status-box {
+            margin: 0 20px 16px;
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--soft);
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .status-box.ok {
+            border-color: var(--ok);
+            color: var(--ok);
+        }
+
+        .status-box.err {
+            border-color: var(--warn);
+            color: var(--warn);
+        }
+
+        .tips {
+            padding: 16px 20px;
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: 14px;
+        }
+
+        .editor-wrap {
+            min-width: 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #code {
+            display: none;
+        }
+
+        .CodeMirror {
+            flex: 1;
+            height: auto;
+            min-height: 0;
+            width: 100%;
+            border: 0;
+            background: var(--editor);
+            font-family: Consolas, "SFMono-Regular", monospace;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .CodeMirror-scroll {
+            min-height: 0;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 10px 14px;
+            background: var(--card);
+            border-top: 1px solid var(--border);
+        }
+
+        .toolbar .hint {
+            margin-left: auto;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .output h2 {
+            margin: 0;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border);
+            font-size: 15px;
+        }
+
+        #out {
+            padding: 18px;
+            white-space: pre-wrap;
+            font-family: Consolas, "SFMono-Regular", monospace;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        #out div {
+            margin-bottom: 6px;
+        }
+
+        .console-line {
+            display: block;
+        }
+
+        .console-log {
+            color: var(--text);
+        }
+
+        .console-success {
+            color: var(--ok);
+            font-weight: 700;
+        }
+
+        .console-warn {
+            color: var(--warn);
+            font-weight: 700;
+        }
+
+        .console-error {
+            color: var(--err);
+            font-weight: 700;
+        }
+
+        .console-muted {
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .ok-text {
+            color: var(--ok);
+        }
+
+        .err-text {
+            color: var(--err);
+        }
+
+        .warn-text {
+            color: var(--warn);
+        }
+
+        @media (max-width: 980px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            main {
+                grid-template-columns: 1fr;
+            }
+
+            aside,
+            .output {
+                border: 0;
+            }
+
+            textarea {
+                min-height: 420px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="brand">TP Mini Motus & Pendu JS</div>
+        <select id="missionSelect"></select>
+        <button id="runHeader">Run</button>
+        <button id="theme" class="secondary" title="Changer le theme">Mode clair</button>
+        <span id="saved" class="saved">Code sauvegarde</span>
+    </header>
+
+    <main>
+        <aside>
+            <section class="mission">
+                <h1 id="missionTitle"></h1>
+                <p id="missionText"></p>
+                <p id="missionGoal"></p>
+            </section>
+            <div id="progress" class="progress"></div>
+            <div id="missionStatus" class="status-box">Aucune execution pour cette mission.</div>
+            <div class="tips">
+                <strong>But de la matinee</strong><br>
+                Comprendre comment un jeu utilise des variables, des tableaux, des conditions et des boucles. Ensuite, choisir Motus ou Pendu dans le dossier <code>student</code>, puis deployer sur Netlify.
+            </div>
+        </aside>
+
+        <section class="editor-wrap">
+            <textarea id="code" spellcheck="false"></textarea>
+            <div class="toolbar">
+                <button id="run">Executer</button>
+                <button id="reset" class="secondary">Reinitialiser</button>
+                <button id="clear" class="secondary">Effacer console</button>
+                <button id="save" class="save">Sauvegarder</button>
+                <button id="format" class="secondary">Formater</button>
+                <span class="hint">Ctrl + Entree pour executer</span>
+            </div>
+        </section>
+
+        <section class="output">
+            <h2>Console</h2>
+            <pre id="out">Clique sur Executer.</pre>
+        </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/lib/codemirror.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/edit/matchbrackets.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/selection/active-line.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/lint.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jshint@2.13.6/dist/jshint.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/codemirror@5.65.16/addon/lint/javascript-lint.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prettier@3.3.3/standalone.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prettier@3.3.3/plugins/babel.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prettier@3.3.3/plugins/estree.js"></script>
+    <script>
+    const missions = [
+        {
+            title: "1. Premier message",
+            text: "Tu as deja vu la console: elle sert a afficher des messages pour comprendre ce que fait le programme.",
+            goal: "Objectif: lis l'exemple, puis affiche exactement Bonjour Motus.",
+            starter: "// Exemple :\nconsole.log(\"Hello\");\n\n// Mission : affiche exactement Bonjour Motus\n// Ecris ton code juste en dessous :\n",
+            check: r => r.logs.includes("Bonjour Motus")
+        },
+        {
+            title: "2. Un mot secret",
+            text: "Une variable sert a garder une information en memoire. Pour Motus, on commence par garder le mot secret.",
+            goal: "Objectif: lis l'exemple, puis cree une variable motSecret qui vaut TABLE et affiche-la.",
+            starter: "// Exemple :\nlet prenom = \"Alex\";\nconsole.log(prenom);\n\n// Mission : cree motSecret avec le mot TABLE, puis affiche-le\n// Ecris ton code juste en dessous :\n",
+            check: r => r.context.motSecret === "TABLE" && r.logs.includes("TABLE")
+        },
+        {
+            title: "3. Une liste de mots",
+            text: "Un tableau permet de ranger plusieurs valeurs. Ici, on range plusieurs mots possibles.",
+            goal: "Objectif: cree un tableau mots avec au moins 4 mots, puis affiche sa longueur.",
+            starter: "// Exemple :\nlet couleurs = [\"ROUGE\", \"BLEU\", \"VERT\"];\nconsole.log(couleurs.length);\n\n// Mission : cree un tableau mots avec au moins 4 mots\n// Puis affiche sa longueur avec console.log\n",
+            check: r => Array.isArray(r.context.mots) && r.context.mots.length >= 4
+        },
+        {
+            title: "4. Choisir au hasard",
+            text: "Un jeu devient plus interessant quand le mot change tout seul. On utilise une fonction randomInt.",
+            goal: "Objectif: choisis un mot au hasard dans le tableau et stocke-le dans motSecret.",
+            starter: "function randomInt(min, max) {\n    return Math.floor(Math.random() * (max - min + 1)) + min;\n}\n\n// Exemple :\nlet nombres = [10, 20, 30];\nlet nombreSecret = nombres[randomInt(0, nombres.length - 1)];\nconsole.log(nombreSecret);\n\n// Mission : cree mots, puis choisis motSecret au hasard\n",
+            check: r => Array.isArray(r.context.mots) && r.context.mots.includes(r.context.motSecret)
+        },
+        {
+            title: "5. Lire une tentative",
+            text: "Le joueur propose un mot. Avant de comparer, on verifie que la tentative a la bonne longueur.",
+            goal: "Objectif: cree une tentative TABLE et affiche bonne longueur si elle contient 5 lettres.",
+            starter: "// Exemple :\nlet pseudo = \"NOVA\";\n\nif (pseudo.length === 4) {\n    console.log(\"pseudo valide\");\n}\n\n// Mission : cree tentative avec TABLE\n// Si tentative contient 5 lettres, affiche bonne longueur\n",
+            check: r => r.context.tentative === "TABLE" && r.logs.includes("bonne longueur")
+        },
+        {
+            title: "6. Comparer une lettre",
+            text: "La regle verte du Motus: une lettre est bonne si elle est au bon endroit.",
+            goal: "Objectif: compare la premiere lettre de tentative et motSecret.",
+            starter: "// Exemple :\nlet mot = \"CHAT\";\nlet reponse = \"CHOU\";\n\nif (reponse[0] === mot[0]) {\n    console.log(\"meme premiere lettre\");\n}\n\n// Mission : compare la premiere lettre de tentative et motSecret\nlet motSecret = \"TABLE\";\nlet tentative = \"TIGRE\";\n",
+            check: r => r.logs.includes("vert")
+        },
+        {
+            title: "7. Comparer toutes les lettres",
+            text: "Une boucle permet de verifier les 5 lettres sans copier 5 fois le meme code. Pour savoir si une lettre existe dans un mot, on utilise <code>mot.includes(lettre)</code>.",
+            goal: "Objectif: pour chaque lettre, affiche vert si elle est a la bonne place, jaune si elle existe ailleurs, sinon gris.",
+            starter: "// Exemple 1 : lire les lettres une par une\nlet mot = \"CHAT\";\nfor (let i = 0; i < mot.length; i++) {\n    console.log(mot[i]);\n}\n\n// Exemple 2 : verifier si une lettre existe dans un mot\nlet animal = \"CHIEN\";\nlet lettre = \"I\";\n\nif (animal.includes(lettre)) {\n    console.log(\"la lettre existe\");\n}\n\n// Mission : pour chaque lettre de tentative, affiche vert, jaune ou gris\nlet motSecret = \"TABLE\";\nlet tentative = \"TARTE\";\n\nfor (let i = 0; i < motSecret.length; i++) {\n    let lettreTentative = tentative[i];\n\n    // Si la lettre est au bon endroit : affiche vert\n    // Sinon, si motSecret contient lettreTentative : affiche jaune\n    // Sinon : affiche gris\n}\n",
+            check: r => {
+                const normalized = r.logs.map(l => l.toLowerCase()).join(" ");
+                return r.logs.length >= 5 && normalized.includes("vert") && normalized.includes("jaune") && normalized.includes("gris");
+            }
+        },
+        {
+            title: "8. Compter les essais",
+            text: "Le joueur n'a pas des essais infinis. On utilise un compteur.",
+            goal: "Objectif: augmente essai de 1 et affiche Essai 2.",
+            starter: "// Exemple :\nlet score = 0;\nscore = score + 10;\nconsole.log(score);\n\n// Mission : cree essai avec la valeur 1\n// Augmente essai de 1, puis affiche Essai 2\n",
+            check: r => r.context.essai === 2 && r.logs.includes("Essai 2")
+        },
+        {
+            title: "9. Mini fonction Motus",
+            text: "On regroupe la comparaison dans une fonction pour la reutiliser.",
+            goal: "Objectif: cree une fonction comparer qui retourne vert, jaune ou gris.",
+            starter: "// Exemple :\nfunction direBonjour(prenom) {\n    return \"Bonjour \" + prenom;\n}\n\nconsole.log(direBonjour(\"Alex\"));\n\n// Mission : cree une fonction comparer(motSecret, tentative, position)\n// Elle doit retourner vert, jaune ou gris\n",
+            check: r => typeof r.context.comparer === "function" && r.logs.includes("vert") && r.logs.includes("jaune")
+        },
+        {
+            title: "10. Variante Pendu",
+            text: "Le Pendu utilise la meme base: un mot secret, une lettre proposee, et un tableau de lettres trouvees.",
+            goal: "Objectif: si la lettre existe dans le mot, ajoute-la au tableau lettresTrouvees.",
+            starter: "// Exemple :\nlet animaux = [\"chat\"];\nanimaux.push(\"chien\");\nconsole.log(animaux);\n\n// Mission : si lettre existe dans motSecret, ajoute-la dans lettresTrouvees\nlet motSecret = \"SOLEIL\";\nlet lettre = \"E\";\nlet lettresTrouvees = [];\n",
+            check: r => Array.isArray(r.context.lettresTrouvees) && r.context.lettresTrouvees.includes("E")
+        },
+        {
+            title: "11. Choix final et deploiement",
+            text: "Maintenant, choisis ton fichier: student/motus.html ou student/pendu.html. Complete les zones indiquees, teste, puis deploie sur Netlify Drop.",
+            goal: "Objectif: affiche le nom du jeu que tu veux faire: Motus ou Pendu.",
+            starter: "// Mission finale : choisis ton jeu\n// Cree une variable choix avec Motus ou Pendu\n// Puis affiche Je choisis Motus ou Je choisis Pendu\n",
+            check: r => ["Motus", "Pendu"].includes(r.context.choix) && r.logs.some(l => l.includes("Je choisis"))
+        }
+    ];
+
+    const hints = [
+        "Indice: utilise console.log avec le texte exact Bonjour Motus.",
+        "Indice: il faut une variable let motSecret = ... puis un console.log.",
+        "Indice: un tableau s'ecrit avec des crochets, puis .length donne sa taille.",
+        "Indice: l'index aleatoire doit aller de 0 a mots.length - 1.",
+        "Indice: utilise tentative.length === 5 dans une condition if.",
+        "Indice: la premiere lettre est a l'index 0: tentative[0].",
+        "Indice: commence par let lettreTentative = tentative[i], puis utilise motSecret.includes(lettreTentative).",
+        "Indice: essai = essai + 1 permet d'augmenter le compteur.",
+        "Indice: une fonction peut retourner une valeur avec return.",
+        "Indice: motSecret.includes(lettre) teste si la lettre est dans le mot.",
+        "Indice: choix doit valoir exactement Motus ou Pendu."
+    ];
+
+    const select = document.getElementById("missionSelect");
+    const code = document.getElementById("code");
+    const out = document.getElementById("out");
+    const saved = document.getElementById("saved");
+    const missionStatus = document.getElementById("missionStatus");
+    let editor;
+    let current = Number(localStorage.getItem("tp-motus-current") || 0);
+    let done = JSON.parse(localStorage.getItem("tp-motus-done") || "[]");
+
+    function init() {
+        const savedTheme = localStorage.getItem("tp-motus-theme");
+        if (savedTheme === "light") {
+            document.documentElement.dataset.theme = "light";
+            document.getElementById("theme").textContent = "Mode sombre";
+        }
+
+        editor = CodeMirror.fromTextArea(code, {
+            mode: "javascript",
+            theme: savedTheme === "light" ? "eclipse" : "material-darker",
+            lineNumbers: true,
+            indentUnit: 4,
+            tabSize: 4,
+            indentWithTabs: false,
+            smartIndent: true,
+            matchBrackets: true,
+            styleActiveLine: true,
+            gutters: ["CodeMirror-lint-markers"],
+            lint: {
+                esversion: 11,
+                undef: false,
+                asi: true
+            },
+            extraKeys: {
+                Tab: cm => {
+                    if (cm.somethingSelected()) {
+                        cm.indentSelection("add");
+                    } else {
+                        cm.replaceSelection("    ", "end");
+                    }
+                },
+                "Ctrl-Enter": () => execute(),
+                "Cmd-Enter": () => execute()
+            }
+        });
+
+        missions.forEach((m, i) => {
+            const option = document.createElement("option");
+            option.value = i;
+            option.textContent = m.title;
+            select.appendChild(option);
+        });
+        renderProgress();
+        loadMission(current);
+    }
+
+    function renderProgress() {
+        const progress = document.getElementById("progress");
+        progress.innerHTML = "";
+        missions.forEach((_, i) => {
+            const dot = document.createElement("div");
+            dot.className = "dot" + (done.includes(i) ? " done" : "");
+            progress.appendChild(dot);
+        });
+    }
+
+    function loadMission(index) {
+        current = index;
+        localStorage.setItem("tp-motus-current", current);
+        const mission = missions[current];
+        select.value = current;
+        document.getElementById("missionTitle").textContent = mission.title;
+        document.getElementById("missionText").textContent = mission.text;
+        document.getElementById("missionGoal").innerHTML = "<strong>" + mission.goal + "</strong>";
+        const value = localStorage.getItem("tp-motus-code-" + current) || mission.starter;
+        if (editor) editor.setValue(value);
+        else code.value = value;
+        setStatus("Aucune execution pour cette mission.", "");
+        clearConsole();
+    }
+
+    function getCode() {
+        return editor ? editor.getValue() : code.value;
+    }
+
+    function saveCode() {
+        localStorage.setItem("tp-motus-code-" + current, getCode());
+        saved.classList.add("show");
+        setTimeout(() => saved.classList.remove("show"), 700);
+    }
+
+    async function formatCurrentCode(options = {}) {
+        try {
+            const formatted = await prettier.format(getCode(), {
+                parser: "babel",
+                plugins: prettierPlugins,
+                tabWidth: 4,
+                useTabs: false,
+                semi: true
+            });
+            editor.setValue(formatted.trimEnd() + "\n");
+            if (!options.silent) {
+                saveCode();
+                setStatus("Code formate avec Prettier.", "ok");
+            }
+            return true;
+        } catch (error) {
+            if (!options.silent) {
+                setStatus("Prettier n'a pas pu formater le code. Corrige d'abord la syntaxe.", "err");
+                out.innerHTML = '<div class="console-line console-error">Prettier: ' + escapeHtml(error.message) + '</div>';
+            }
+            return false;
+        }
+    }
+
+    function clearConsole() {
+        out.innerHTML = '<div class="warn-text">Clique sur Executer ou Run pour voir le resultat ici.</div>';
+    }
+
+    function setStatus(text, type) {
+        missionStatus.textContent = text;
+        missionStatus.className = "status-box" + (type ? " " + type : "");
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
+    }
+
+    function logClass(line) {
+        const text = line.toLowerCase();
+        if (text.includes("vert") || text.includes("bravo") || text.includes("bonne")) return "console-success";
+        if (text.includes("jaune") || text.includes("essai")) return "console-warn";
+        if (text.includes("gris") || text.includes("erreur") || text.includes("mauvaise")) return "console-error";
+        return "console-log";
+    }
+
+    function renderConsole(logs, validationHtml) {
+        const lines = logs.length
+            ? logs.map(line => '<div class="console-line ' + logClass(line) + '">' + escapeHtml(line) + '</div>')
+            : ['<div class="console-line console-muted">Code execute sans affichage.</div>'];
+        out.innerHTML = lines.join("") + validationHtml;
+    }
+
+    async function execute() {
+        await formatCurrentCode({ silent: true });
+
+        const logs = [];
+        const context = {};
+        const consoleCapture = {
+            log: (...args) => logs.push(args.map(value => {
+                if (Array.isArray(value)) return "[" + value.join(", ") + "]";
+                return String(value);
+            }).join(" "))
+        };
+
+        try {
+            const runner = new Function("console", "context", getCode() + "\n\n;try { context.motSecret = motSecret; } catch(e) {}\ntry { context.mots = mots; } catch(e) {}\ntry { context.tentative = tentative; } catch(e) {}\ntry { context.essai = essai; } catch(e) {}\ntry { context.comparer = comparer; } catch(e) {}\ntry { context.lettresTrouvees = lettresTrouvees; } catch(e) {}\ntry { context.choix = choix; } catch(e) {}");
+            runner(consoleCapture, context);
+            const result = { logs, context };
+            const success = missions[current].check(result);
+            saveCode();
+
+            if (success) {
+                if (!done.includes(current)) done.push(current);
+                localStorage.setItem("tp-motus-done", JSON.stringify(done));
+                renderProgress();
+                setStatus("Mission reussie. Tu peux passer a la suite.", "ok");
+                renderConsole(logs, '<div class="console-line console-success">Validation: mission reussie.</div>');
+            } else {
+                const hint = hints[current] || "Indice: relis l'objectif, puis relance Run.";
+                setStatus("Mission pas encore validee. " + hint, "err");
+                renderConsole(logs, '<div class="console-line console-warn">Validation: pas encore. ' + escapeHtml(hint) + '</div>');
+            }
+
+            return result;
+        } catch (error) {
+            setStatus("Le code contient une erreur. Corrige le message affiche dans la console.", "err");
+            out.innerHTML = '<div class="console-line console-error">Erreur: ' + escapeHtml(error.message) + '</div><div class="console-line console-warn">Validation: impossible tant que le code ne s execute pas.</div>';
+            return { logs: [], context: {}, error };
+        }
+    }
+
+    select.addEventListener("change", e => loadMission(Number(e.target.value)));
+    document.getElementById("runHeader").addEventListener("click", execute);
+    document.getElementById("run").addEventListener("click", execute);
+    document.getElementById("reset").addEventListener("click", () => {
+        localStorage.removeItem("tp-motus-code-" + current);
+        done = done.filter(index => index !== current);
+        localStorage.setItem("tp-motus-done", JSON.stringify(done));
+        loadMission(current);
+    });
+    document.getElementById("clear").addEventListener("click", clearConsole);
+    document.getElementById("save").addEventListener("click", saveCode);
+    document.getElementById("format").addEventListener("click", () => formatCurrentCode());
+    document.getElementById("theme").addEventListener("click", () => {
+        const light = document.documentElement.dataset.theme === "light";
+        document.documentElement.dataset.theme = light ? "" : "light";
+        localStorage.setItem("tp-motus-theme", light ? "dark" : "light");
+        document.getElementById("theme").textContent = light ? "Mode clair" : "Mode sombre";
+        if (editor) editor.setOption("theme", light ? "material-darker" : "eclipse");
+    });
+    document.addEventListener("keydown", e => {
+        if ((e.ctrlKey || e.metaKey) && e.key === "Enter") execute();
+    });
+
+    init();
+    </script>
+</body>
+</html>

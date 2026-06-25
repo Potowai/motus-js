@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Pendu JS</title>
+    <link rel="stylesheet" href="student-style.css">
+</head>
+<body>
+    <main class="card">
+        <h1>Pendu JS</h1>
+        <p class="sub">Devine le mot secret lettre par lettre avant d'avoir trop d'erreurs.</p>
+
+        <div class="status">
+            <span>Erreurs: <span id="Erreurs">0</span>/7</span>
+            <span>Mot: <span id="LongueurMot">0</span> lettres</span>
+        </div>
+
+        <div id="MotAffiche" class="word"></div>
+
+        <div class="actions">
+            <input id="Lettre" maxlength="1" placeholder="Une lettre">
+            <button onclick="proposer()">Proposer</button>
+            <button class="secondary" onclick="nouvellePartie()">Rejouer</button>
+        </div>
+
+        <p id="Lettres" class="letters"></p>
+        <p id="Message" class="msg"></p>
+    </main>
+
+    <script>
+    // ============================================================
+    // Pendu JS - variante eleve
+    // ============================================================
+
+    function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    const mots = ["SOLEIL", "NUAGE", "FLEUR", "ROUTE", "LAMPE", "CHIEN", "PLAGE", "LIVRE"];
+
+    let motSecret = "";
+    let lettresTrouvees = [];
+    let lettresEssayees = [];
+    let erreurs = 0;
+    let fini = false;
+
+    function choisirMot() {
+        // A COMPLETER:
+        // Retourne un mot au hasard dans le tableau mots.
+        return "SOLEIL";
+    }
+
+    function afficherMessage(texte, type) {
+        let message = document.getElementById("Message");
+        message.textContent = texte;
+        message.className = "msg " + type;
+    }
+
+    function afficherMot() {
+        let zone = document.getElementById("MotAffiche");
+        zone.innerHTML = "";
+
+        for (let i = 0; i < motSecret.length; i++) {
+            let lettre = motSecret[i];
+            let span = document.createElement("span");
+
+            // A COMPLETER:
+            // Si lettresTrouvees contient la lettre, affiche la lettre.
+            // Sinon, affiche "_".
+            span.textContent = "_";
+
+            zone.appendChild(span);
+        }
+    }
+
+    function afficherInfos() {
+        document.getElementById("Erreurs").textContent = erreurs;
+        document.getElementById("LongueurMot").textContent = motSecret.length;
+        document.getElementById("Lettres").textContent = "Lettres essayees: " + lettresEssayees.join(", ");
+    }
+
+    function verifierVictoire() {
+        for (let i = 0; i < motSecret.length; i++) {
+            if (!lettresTrouvees.includes(motSecret[i])) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function proposer() {
+        if (fini) return;
+
+        let input = document.getElementById("Lettre");
+        let lettre = input.value.trim().toUpperCase();
+        input.value = "";
+        input.focus();
+
+        if (lettre.length !== 1) {
+            afficherMessage("Entre une seule lettre.", "err");
+            return;
+        }
+
+        if (lettresEssayees.includes(lettre)) {
+            afficherMessage("Tu as deja essaye cette lettre.", "err");
+            return;
+        }
+
+        lettresEssayees.push(lettre);
+
+        // A COMPLETER:
+        // Si motSecret contient la lettre:
+        // - ajoute-la dans lettresTrouvees
+        // - affiche un message positif
+        // Sinon:
+        // - ajoute 1 a erreurs
+        // - affiche un message d'erreur
+
+        afficherMot();
+        afficherInfos();
+
+        if (verifierVictoire()) {
+            fini = true;
+            afficherMessage("Bravo, tu as trouve le mot !", "ok");
+        }
+
+        if (erreurs >= 7) {
+            fini = true;
+            afficherMessage("Perdu ! Le mot etait " + motSecret + ".", "err");
+        }
+    }
+
+    function nouvellePartie() {
+        motSecret = choisirMot();
+        lettresTrouvees = [];
+        lettresEssayees = [];
+        erreurs = 0;
+        fini = false;
+        afficherMot();
+        afficherInfos();
+        afficherMessage("Propose une lettre.", "");
+        document.getElementById("Lettre").focus();
+    }
+
+    nouvellePartie();
+    </script>
+</body>
+</html>

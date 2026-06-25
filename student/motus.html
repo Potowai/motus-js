@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mon Mini Motus</title>
+    <link rel="stylesheet" href="student-style.css">
+</head>
+<body>
+    <main class="card">
+        <h1>Mini Motus</h1>
+        <p class="sub">Trouve le mot secret en 6 essais. Vert: bonne place. Jaune: mauvaise place. Gris: absent.</p>
+
+        <div id="Grille" class="grid"></div>
+
+        <div class="actions">
+            <input id="Tentative" maxlength="5" placeholder="Mot de 5 lettres">
+            <button onclick="valider()">Valider</button>
+            <button class="secondary" onclick="nouvellePartie()">Rejouer</button>
+        </div>
+
+        <p id="Message" class="msg"></p>
+    </main>
+
+    <script>
+    // ============================================================
+    // Mini Motus - version eleve
+    // ============================================================
+
+    function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    // 1. Tu peux ajouter tes propres mots de 5 lettres.
+    const mots = ["TABLE", "CHIEN", "PLAGE", "ROUTE", "LAMPE", "LIVRE", "FLEUR", "NUAGE"];
+
+    let motSecret = "";
+    let essai = 0;
+    let fini = false;
+
+    function choisirMot() {
+        // A COMPLETER:
+        // Choisis un mot au hasard dans le tableau mots.
+        // Astuce: mots[randomInt(0, mots.length - 1)]
+        return "TABLE";
+    }
+
+    function creerGrille() {
+        let grille = document.getElementById("Grille");
+        grille.innerHTML = "";
+
+        for (let ligne = 0; ligne < 6; ligne++) {
+            let row = document.createElement("div");
+            row.className = "row";
+
+            for (let colonne = 0; colonne < 5; colonne++) {
+                let c = document.createElement("div");
+                c.className = "case";
+                row.appendChild(c);
+            }
+
+            grille.appendChild(row);
+        }
+    }
+
+    function afficherMessage(texte, type) {
+        let message = document.getElementById("Message");
+        message.textContent = texte;
+        message.className = "msg " + type;
+    }
+
+    function nettoyer(mot) {
+        return mot.trim().toUpperCase();
+    }
+
+    function afficherMot(mot) {
+        let grille = document.getElementById("Grille");
+        let ligne = grille.children[essai];
+
+        for (let i = 0; i < 5; i++) {
+            let caseLettre = ligne.children[i];
+            let lettre = mot[i];
+
+            caseLettre.textContent = lettre;
+
+            // A COMPLETER:
+            // Si la lettre est exactement a la bonne position: classe "case bon"
+            // Sinon si la lettre existe dans le mot secret: classe "case presque"
+            // Sinon: classe "case faux"
+            caseLettre.className = "case faux";
+        }
+    }
+
+    function valider() {
+        if (fini) return;
+
+        let input = document.getElementById("Tentative");
+        let mot = nettoyer(input.value);
+        input.value = "";
+
+        if (mot.length !== 5) {
+            afficherMessage("Il faut entrer un mot de 5 lettres.", "err");
+            return;
+        }
+
+        afficherMot(mot);
+
+        // A COMPLETER:
+        // Si mot est egal a motSecret, afficher la victoire et terminer la partie.
+
+        essai++;
+
+        // A COMPLETER:
+        // Si essai arrive a 6, afficher la defaite et terminer la partie.
+
+        afficherMessage("Continue ! Essai " + (essai + 1) + " sur 6.", "");
+    }
+
+    function nouvellePartie() {
+        motSecret = choisirMot();
+        essai = 0;
+        fini = false;
+        creerGrille();
+        afficherMessage("A toi de jouer.", "");
+        document.getElementById("Tentative").focus();
+    }
+
+    nouvellePartie();
+    </script>
+</body>
+</html>
